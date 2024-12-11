@@ -6,12 +6,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -43,11 +42,6 @@ public class User {
 
   @OneToMany(mappedBy = "author", cascade = ALL, orphanRemoval = true)
   private final List<Tweet> tweets = new ArrayList<>();
-
-  public void addTweet(Tweet tweet) {
-    tweets.add(tweet);
-    tweet.setAuthor(this);
-  }
 
   @Override
   public boolean equals(Object o) {

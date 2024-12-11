@@ -41,8 +41,7 @@ public class TweetServiceImpl implements TweetService {
 
     Optional<User> optUser = userService.getUserById(authorId);
     if (optUser.isEmpty()) {
-      log.error("User with id {} not found while creating tweet.", authorId);
-      throw new BadRequestException("Please provide a existing authorId.");
+      throw new BadRequestException("User '" + authorId + "' not found while creating tweet.");
     }
 
     Tweet tweet = Tweet.builder().author(optUser.get()).content(content).build();

@@ -1,6 +1,5 @@
 package hm.edu.x.service.impl;
 
-import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -8,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import hm.edu.x.data.request.PostTweetRequest;
+import hm.edu.x.data.response.GetTweetResponse;
 import hm.edu.x.data.response.PostTweetResponse;
 import hm.edu.x.exception.BadRequestException;
 import hm.edu.x.mapper.TweetMapper;
@@ -15,8 +15,7 @@ import hm.edu.x.model.Tweet;
 import hm.edu.x.model.User;
 import hm.edu.x.persistence.TweetRepository;
 import hm.edu.x.service.UserService;
-
-import java.util.UUID;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -59,13 +58,48 @@ public class TweetServiceImplTest {
   }
 
   @Test
-  void shouldThrowBadRequestExceptionWhenUserDoesNotExistDuringTweetCreation() {
-    UUID nonExistingUserId = UUID.randomUUID();
-    when(userService.getUserById(nonExistingUserId)).thenReturn(empty());
-    when(userService.getUserById(nonExistingUserId)).thenReturn(empty());
-    PostTweetRequest request = new PostTweetRequest(nonExistingUserId, TWEET_CONTENT);
+  void shouldThrowBadRequestExceptionWhenNoContentIsProvided() {
+    User expUser = createUser(MAIL, USERNAME, FIRST_NAME, LAST_NAME);
+    PostTweetRequest request = new PostTweetRequest(expUser.getId(), "");
 
     assertThrows(BadRequestException.class, () -> tweetService.postTweet(request));
+  }
+
+  @Test
+  void shouldReturnAllExistingTweets() {
+    User expUser1 = createUser(MAIL, USERNAME, FIRST_NAME, LAST_NAME);
+    User expUser2 = createUser(MAIL, USERNAME, FIRST_NAME, LAST_NAME);
+    Tweet expTweet1 = createTweet(expUser1, TWEET_CONTENT);
+    Tweet expTweet2 = createTweet(expUser1, TWEET_CONTENT);
+    Tweet expTweet3 = createTweet(expUser1, TWEET_CONTENT);
+    Tweet expTweet4 = createTweet(expUser2, TWEET_CONTENT);
+    Tweet expTweet5 = createTweet(expUser2, TWEET_CONTENT);
+
+    when(tweetRepository.findAll())
+        .thenReturn(List.of(expTweet1, expTweet2, expTweet3, expTweet4, expTweet5));
+    when(tweetMapper.tweetsToGetTweetResponse(
+            List.of(expTweet1, expTweet2, expTweet3, expTweet4, expTweet5)))
+        .thenReturn(
+            List.of(
+                new GetTweetResponse(expTweet1.getId(), expUser1.getId(), expTweet1.getContent()),
+                new GetTweetResponse(expTweet2.getId(), expUser1.getId(), expTweet2.getContent()),
+                new GetTweetResponse(expTweet3.getId(), expUser1.getId(), expTweet3.getContent()),
+                new GetTweetResponse(expTweet4.getId(), expUser2.getId(), expTweet4.getContent()),
+                new GetTweetResponse(expTweet5.getId(), expUser2.getId(), expTweet5.getContent())));
+
+    List<GetTweetResponse> response = tweetService.getTweets();
+
+    assertEquals(5, response.size());
+  }
+
+  @Test
+  void shouldReturnEmptyListWhenNoTweetsExist() {
+    when(tweetRepository.findAll()).thenReturn(List.of());
+    when(tweetMapper.tweetsToGetTweetResponse(List.of())).thenReturn(List.of());
+
+    List<GetTweetResponse> response = tweetService.getTweets();
+
+    assertEquals(0, response.size());
   }
 
   private User createUser(String email, String username, String firstName, String lastName) {

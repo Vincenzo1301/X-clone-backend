@@ -4,9 +4,9 @@ import hm.edu.x.data.request.PostTweetRequest;
 import hm.edu.x.data.response.GetTweetResponse;
 import hm.edu.x.data.response.PostTweetResponse;
 import hm.edu.x.service.TweetService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +24,7 @@ public class TweetRestController {
   }
 
   @PostMapping
-  public ResponseEntity<PostTweetResponse> postTweet(@NonNull @RequestBody PostTweetRequest tweet) {
+  public ResponseEntity<PostTweetResponse> postTweet(@Valid @RequestBody PostTweetRequest tweet) {
     return ResponseEntity.ok(tweetService.postTweet(tweet));
   }
 
