@@ -1,8 +1,8 @@
 package hm.edu.x.resource;
 
 import hm.edu.x.data.request.PostTweetRequest;
+import hm.edu.x.data.response.GetTweetResponse;
 import hm.edu.x.data.response.PostTweetResponse;
-import hm.edu.x.model.Tweet;
 import hm.edu.x.service.TweetService;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +29,7 @@ public class TweetRestController {
   }
 
   @GetMapping
-  public ResponseEntity<List<Tweet>> getTweets() {
+  public ResponseEntity<List<GetTweetResponse>> getTweets() {
     return ResponseEntity.ok(tweetService.getTweets());
   }
 }
