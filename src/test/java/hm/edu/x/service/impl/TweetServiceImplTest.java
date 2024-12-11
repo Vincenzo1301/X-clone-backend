@@ -59,7 +59,7 @@ public class TweetServiceImplTest {
   }
 
   @Test
-  void shouldThrowBadRequestExceptionWhenUserDoesNotExist() {
+  void shouldThrowBadRequestExceptionWhenUserDoesNotExistDuringTweetCreation() {
     UUID nonExistingUserId = UUID.randomUUID();
     when(userService.getUserById(nonExistingUserId)).thenReturn(empty());
     when(userService.getUserById(nonExistingUserId)).thenReturn(empty());

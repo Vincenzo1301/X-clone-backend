@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,6 +24,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
+@Table(name = "USERS")
 public class User {
 
   @Id private final UUID id = UUID.randomUUID();

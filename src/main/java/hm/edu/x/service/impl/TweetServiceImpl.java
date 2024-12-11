@@ -48,7 +48,6 @@ public class TweetServiceImpl implements TweetService {
     Tweet tweet = Tweet.builder().author(optUser.get()).content(content).build();
     User user = optUser.get();
 
-    user.addTweet(tweet);
     Tweet savedTweet = repository.save(tweet);
 
     log.info("Tweet with id {} created by user with id {}", savedTweet.getId(), user.getId());
