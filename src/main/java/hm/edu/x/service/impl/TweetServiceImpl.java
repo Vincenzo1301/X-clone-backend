@@ -3,12 +3,15 @@ package hm.edu.x.service.impl;
 import hm.edu.x.data.request.PostTweetRequest;
 import hm.edu.x.data.response.GetTweetResponse;
 import hm.edu.x.data.response.PostTweetResponse;
+import hm.edu.x.exception.BadRequestException;
+import hm.edu.x.mapper.TweetMapper;
 import hm.edu.x.model.Tweet;
 import hm.edu.x.model.User;
 import hm.edu.x.persistence.TweetRepository;
 import hm.edu.x.service.TweetService;
 import hm.edu.x.service.UserService;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -17,10 +20,13 @@ import org.springframework.stereotype.Service;
 public class TweetServiceImpl implements TweetService {
 
   private final TweetRepository tweetRepository;
+  private final TweetMapper tweetMapper;
   private final UserService userService;
 
-  public TweetServiceImpl(TweetRepository tweetRepository, UserService userService) {
+  public TweetServiceImpl(
+      TweetRepository tweetRepository, TweetMapper tweetMapper, UserService userService) {
     this.tweetRepository = tweetRepository;
+    this.tweetMapper = tweetMapper;
     this.userService = userService;
   }
 
@@ -29,33 +35,18 @@ public class TweetServiceImpl implements TweetService {
     UUID authorId = request.authorId();
     String content = request.content();
 
-    User user =
-        userService
-            .getUserById(authorId)
-            .orElseThrow(
-                () ->
-                    new IllegalArgumentException(
-                        "User not found")); // TODO: 2021-07-07 07:57:00 - Add proper exception
+    Optional<User> optUser = userService.getUserById(authorId);
+    if (optUser.isEmpty()) throw new BadRequestException("Please provide a existing authorId.");
 
-    Tweet tweet = new Tweet();
-    tweet.setAuthor(user);
-    tweet.setContent(content);
+    Tweet tweet = Tweet.builder().author(optUser.get()).content(content).build();
 
     Tweet savedTweet = tweetRepository.save(tweet);
 
-    return new PostTweetResponse(
-        savedTweet.getId(),
-        savedTweet.getAuthor().getId(),
-        savedTweet
-            .getContent()); // TODO: 2021-07-07 07:57:00 - Use mapper to map entity to response
+    return tweetMapper.tweetToPostTweetResponse(savedTweet);
   }
 
   @Override
   public List<GetTweetResponse> getTweets() {
-    return tweetRepository.findAll().stream()
-        .map(
-            tweet ->
-                new GetTweetResponse(tweet.getId(), tweet.getAuthor().getId(), tweet.getContent()))
-        .toList();
+    return tweetMapper.tweetsToGetTweetResponse(tweetRepository.findAll());
   }
 }
