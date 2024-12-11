@@ -1,4 +1,4 @@
-package hm.edu.x;
+package hm.edu.x.service.impl;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -15,7 +15,7 @@ import hm.edu.x.model.Tweet;
 import hm.edu.x.model.User;
 import hm.edu.x.persistence.TweetRepository;
 import hm.edu.x.service.UserService;
-import hm.edu.x.service.impl.TweetServiceImpl;
+
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +39,7 @@ public class TweetServiceImplTest {
   @InjectMocks private TweetServiceImpl tweetService;
 
   @Test
-  public void shouldCreateTweet() {
+  void shouldCreateTweet() {
     User expUser = createUser(MAIL, USERNAME, FIRST_NAME, LAST_NAME);
     Tweet expTweet = createTweet(expUser, TWEET_CONTENT);
 
@@ -59,7 +59,7 @@ public class TweetServiceImplTest {
   }
 
   @Test
-  public void shouldThrowBadRequestExceptionWhenUserDoesNotExist() {
+  void shouldThrowBadRequestExceptionWhenUserDoesNotExist() {
     UUID nonExistingUserId = UUID.randomUUID();
     when(userService.getUserById(nonExistingUserId)).thenReturn(empty());
     when(userService.getUserById(nonExistingUserId)).thenReturn(empty());

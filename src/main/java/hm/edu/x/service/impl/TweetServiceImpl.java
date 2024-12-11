@@ -1,5 +1,7 @@
 package hm.edu.x.service.impl;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import hm.edu.x.data.request.PostTweetRequest;
 import hm.edu.x.data.response.GetTweetResponse;
 import hm.edu.x.data.response.PostTweetResponse;
@@ -13,20 +15,22 @@ import hm.edu.x.service.UserService;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.slf4j.Logger;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TweetServiceImpl implements TweetService {
 
-  private final TweetRepository tweetRepository;
-  private final TweetMapper tweetMapper;
+  private static final Logger log = getLogger(TweetServiceImpl.class);
+
+  private final TweetRepository repository;
+  private final TweetMapper mapper;
   private final UserService userService;
 
-  public TweetServiceImpl(
-      TweetRepository tweetRepository, TweetMapper tweetMapper, UserService userService) {
-    this.tweetRepository = tweetRepository;
-    this.tweetMapper = tweetMapper;
+  public TweetServiceImpl(TweetRepository repository, TweetMapper mapper, UserService userService) {
+    this.repository = repository;
+    this.mapper = mapper;
     this.userService = userService;
   }
 
@@ -36,17 +40,23 @@ public class TweetServiceImpl implements TweetService {
     String content = request.content();
 
     Optional<User> optUser = userService.getUserById(authorId);
-    if (optUser.isEmpty()) throw new BadRequestException("Please provide a existing authorId.");
+    if (optUser.isEmpty()) {
+      log.error("User with id {} not found while creating tweet.", authorId);
+      throw new BadRequestException("Please provide a existing authorId.");
+    }
 
     Tweet tweet = Tweet.builder().author(optUser.get()).content(content).build();
+    User user = optUser.get();
 
-    Tweet savedTweet = tweetRepository.save(tweet);
+    user.addTweet(tweet);
+    Tweet savedTweet = repository.save(tweet);
 
-    return tweetMapper.tweetToPostTweetResponse(savedTweet);
+    log.info("Tweet with id {} created by user with id {}", savedTweet.getId(), user.getId());
+    return mapper.tweetToPostTweetResponse(savedTweet);
   }
 
   @Override
   public List<GetTweetResponse> getTweets() {
-    return tweetMapper.tweetsToGetTweetResponse(tweetRepository.findAll());
+    return mapper.tweetsToGetTweetResponse(repository.findAll());
   }
 }
