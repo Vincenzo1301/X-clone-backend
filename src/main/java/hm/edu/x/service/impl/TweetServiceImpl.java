@@ -44,8 +44,8 @@ public class TweetServiceImpl implements TweetService {
       throw new BadRequestException("User '" + authorId + "' not found while creating tweet.");
     }
 
-    Tweet tweet = Tweet.builder().author(optUser.get()).content(content).build();
     User user = optUser.get();
+    Tweet tweet = Tweet.builder().author(user).content(content).build();
 
     Tweet savedTweet = repository.save(tweet);
 

@@ -1,5 +1,8 @@
 package hm.edu.x.resource;
 
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
+
 import hm.edu.x.data.request.PostTweetRequest;
 import hm.edu.x.data.response.GetTweetResponse;
 import hm.edu.x.data.response.PostTweetResponse;
@@ -25,11 +28,11 @@ public class TweetRestController {
 
   @PostMapping
   public ResponseEntity<PostTweetResponse> postTweet(@Valid @RequestBody PostTweetRequest tweet) {
-    return ResponseEntity.ok(tweetService.postTweet(tweet));
+    return new ResponseEntity<>(tweetService.postTweet(tweet), CREATED);
   }
 
   @GetMapping
   public ResponseEntity<List<GetTweetResponse>> getTweets() {
-    return ResponseEntity.ok(tweetService.getTweets());
+    return new ResponseEntity<>(tweetService.getTweets(), OK);
   }
 }
